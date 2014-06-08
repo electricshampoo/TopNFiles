@@ -1,4 +1,4 @@
 TopNFiles
 =========
 
-Finds the biggest n files in a directory.
+Finds the n biggest files in a directory.
