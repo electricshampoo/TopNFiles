@@ -23,14 +23,11 @@ getFileSizes = getRecursiveContents ~> \file -> do
     size <- lift $ getFileSize file
     yield $ Pair size file
 
--- keeps heap at most size k and keeps the largest k so far
--- SELF INVENTED AHHHHHHHHHHHHHHHHH
--- using min heap to track the largest elements #yoloswag
-beastInsert :: Ord a => Int -> H.Heap H.MinPolicy a -> a -> H.Heap H.MinPolicy a
-beastInsert 0 _ _ = H.empty
-beastInsert k heap val
+boundedInsert :: Ord a => Int -> H.Heap H.MinPolicy a -> a -> H.Heap H.MinPolicy a
+boundedInsert 0 _ _ = H.empty
+boundedInsert k heap val
     | k < 0 = error "The bounding size should not be negative."
-    | k < H.size heap = beastInsert k heap' val
+    | k < H.size heap = boundedInsert k heap' val
     | k == H.size heap = if val < minItem then heap else H.insert val heap'
     | otherwise = H.insert val heap
     where (minItem, heap') = unsafeFromMaybe $ H.view heap
@@ -38,7 +35,7 @@ beastInsert k heap val
           unsafeFromMaybe _ = error "This cannot happen."
 
 biggestFiles :: Int -> FilePath -> IO (H.Heap H.MinPolicy FileSizePair)
-biggestFiles k = fold (beastInsert k) H.empty id . getFileSizes 
+biggestFiles k = fold (boundedInsert k) H.empty id . getFileSizes 
 
 main :: IO ()
 main = do
