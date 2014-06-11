@@ -17,8 +17,8 @@ instance Ord a => Ord (FilePathPair a) where
 topFilesBy :: Ord a => (FilePath -> IO a) -> Int -> FilePath -> IO (H.Heap H.MinPolicy (FilePathPair a))
 topFilesBy f k = fold (boundedInsert k) H.empty id . getPairs where
     getPairs = getRecursiveContents ~> \file -> do
-        size <- lift $ f file
-        yield $ Pair file size
+        val <- lift $ f file
+        yield $ Pair file val
 
 biggestFiles :: Int -> FilePath -> IO (H.Heap H.MinPolicy (FilePathPair FileOffset))
 biggestFiles = topFilesBy getFileSize where
